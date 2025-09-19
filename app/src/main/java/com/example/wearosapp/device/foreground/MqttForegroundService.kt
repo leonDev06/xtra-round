@@ -22,7 +22,6 @@ import com.example.wearosapp.device.util.NotificationManager
 import com.example.wearosapp.network.model.IotHubConfig
 import com.example.wearosapp.presentation.MainActivity
 import com.hivemq.client.mqtt.MqttClient
-import com.hivemq.client.mqtt.MqttWebSocketConfig
 import com.hivemq.client.mqtt.datatypes.MqttQos
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient
 import kotlinx.coroutines.CoroutineScope
@@ -56,9 +55,10 @@ class MqttForegroundService : Service() {
         super.onCreate()
         Log.i(TAG, "Service onCreate() - Performing one-time setup.")
 
-        val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+        // Acquire a wake lock
+        val powerManager = getSystemService(POWER_SERVICE) as PowerManager
         val wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "WearOSApp::MqttWakeLock")
-        wakeLock.acquire(20 * 60 * 1000)
+        wakeLock.acquire(30 * 60 * 1000)
 
         customNotificationManager = NotificationManager(this)
         createNotificationChannel()
@@ -115,12 +115,7 @@ class MqttForegroundService : Service() {
             // Server
             .identifier(DeviceInfoProvider.androidId)
             .serverHost(iotHubConfig!!.iotHost)
-            .serverPort(443)
-            .webSocketConfig(
-                MqttWebSocketConfig.builder()
-                    .serverPath("/mqtt")
-                    .build()
-            )
+            .serverPort(8883)
             .sslWithDefaultConfig() // Uses default SSL context
 
         clientBuilder.addDisconnectedListener { context ->
@@ -243,6 +238,12 @@ class MqttForegroundService : Service() {
     }
 
     private fun disconnectMqtt(broadcastStatus: Boolean = true) {
+        val isConnected = mqttClient?.state?.isConnected ?: false
+        if (!isConnected) {
+            Log.w(TAG, "MQTT client is not connected, cannot disconnect.")
+            return
+        }
+
         mqttClient?.disconnect()?.whenComplete { _, throwable ->
             if (throwable != null) {
                 Log.e(TAG, "Error disconnecting MQTT client: ${throwable.message}", throwable)
