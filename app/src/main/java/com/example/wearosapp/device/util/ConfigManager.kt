@@ -30,6 +30,7 @@ object ConfigManager {
                 contentType(ContentType.Application.Json)
                 headers{
                     append("tenantID", "1")
+                    append("apiKey", "xtra")
                 }
             }.body()
             true

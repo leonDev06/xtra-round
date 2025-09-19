@@ -74,8 +74,10 @@ dependencies {
     implementation(libs.ktor.serialization.kotlinx.json)
 
     implementation(libs.koin.core)
-    implementation(libs.koin.ktor) // if you're using Ktor server
-    implementation(libs.koin.android) // if you're using Android
+    implementation(libs.koin.ktor)
+    implementation(libs.koin.android)
+
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
 
 
 

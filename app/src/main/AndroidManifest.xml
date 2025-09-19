@@ -11,7 +11,19 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING" />
+
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
+
+
+    <!-- TODO: Remove Allow cleartext traffic -->
     <application
+
+        android:usesCleartextTraffic="true"
         android:name=".MyApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -25,7 +37,28 @@
             android:name="wear-sdk"
             android:required="false" />
 
-        <receiver android:name=".device.receiver.NotificationActionReceiver" />
+        <receiver
+            android:name=".device.receiver.NotificationActionReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action." />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".device.receiver.BootCompletedReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Your MqttForegroundService declaration (if you have it) -->
+        <service
+            android:name=".device.foreground.MqttForegroundService"
+            android:foregroundServiceType="remoteMessaging" />
 
         <meta-data
             android:name="com.google.android.wearable.standalone"
